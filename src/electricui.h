@@ -52,6 +52,16 @@ typedef struct {
 } eui_interface_t;
 
 /**
+ * @brief Send the state of variable with index i and expects a response
+ *
+ * Designed for use externally when data changes to notify the UI of the change and expect an ACK.
+ *
+ * @param i index of the tracked variable
+ *  */
+void send_update_on_tracked_variable(eui_variable_count_t i);
+
+
+/**
  * @brief Get a pointer to the tracked object by name
  *
  * Searches through the user-space tracked variable array (if provided), and returns a pointer to the first exact matching identifier string.

@@ -619,4 +619,13 @@ send_tracked_variables( void )
     }
 }
 
+void send_update_on_tracked_variable(eui_variable_count_t i) {
+    eui_pkt_settings_t      temp_header = { 0 };
+
+    temp_header.internal    = MSG_DEV;
+    temp_header.response    = MSG_RESP;
+    eui_send( auto_output(), p_dev_tracked + i, &temp_header );
+}
+
+
 // END electricui.c
