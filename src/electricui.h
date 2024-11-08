@@ -30,7 +30,7 @@ extern "C" {
     #warning "ElectricUI will not handle data larger than PAYLOAD_SIZE_MAX"
 #endif
 
-#define EUI_LIBRARY_VERSION 8u
+#define EUI_LIBRARY_VERSION 9u
 
 /**
  * @brief Interfaces contain local storage for inbound packets, and pointers for data output callbacks, and state callbacks
@@ -208,6 +208,30 @@ eui_send_untracked( eui_message_t *p_msg_obj );
  */
 void
 eui_send_untracked_on( eui_message_t *p_msg_obj, eui_interface_t *interface );
+
+/**
+ * @brief Get offset between pointer to SD object (stored in memory) and the pointer to the data
+ *
+ * This function must be provided externally to the library.
+ *
+ * @param ptr Pointer to the SD object
+ * @param raw_type Type of the data (this is the type byte whose lower 4bits if the data type and upper 4 bits if pointer type and RO vs WR)
+ * @param size Size of the data
+ * @return Pointer to the data (as void*)
+ */
+void*
+data_ptr_from_object(void* ptr, uint8_t raw_type, uint16_t size);
+
+/**
+ * @brief Have SD object reset its update state after ack comes in
+ *
+ * When acknowledgement comes in, this functions resets the update state of the SD object so more data can be sent instead of
+ * waiting earlier data to be ack'd. Since SD Objects prevents multiple updates in a row without acks in between this is
+ * necessary for the next update to be sent.
+ */
+void
+ack_object(void* ptr);
+
 
 #ifdef __cplusplus
 }

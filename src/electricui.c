@@ -215,6 +215,13 @@ handle_packet_action(   eui_interface_t *valid_packet,
         uint8_t is_callback = ((uint8_t)p_msg_obj->type & 0x0Fu) == TYPE_CALLBACK;
         uint8_t is_writable = !((uint8_t)p_msg_obj->type >> 7u);
 
+        uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
+        void* data_ptr = p_msg_obj->ptr.data;
+        if (is_object && (header->data_len == 0) )  {
+            //empty packet, treat as ack
+            ack_object(p_msg_obj->ptr.data);
+        }
+
         if( is_callback )
         {
             if(    ((uint8_t)header->response && (uint8_t)header->acknum)
@@ -235,11 +242,15 @@ handle_packet_action(   eui_interface_t *valid_packet,
         }
         else if( valid_packet->packet.parser.data_bytes_in )
         {
+            if (is_object) {
+                data_ptr = data_ptr_from_object(p_msg_obj->ptr.data, p_msg_obj->type, p_msg_obj->size);
+            }
+
             // Ensure data won't exceed bounds with invalid offsets/lengths
             if( is_writable && 
                 (valid_packet->packet.offset_in + (uint16_t)header->data_len) <= p_msg_obj->size )
             {
-                memcpy( (uint8_t *)p_msg_obj->ptr.data + valid_packet->packet.offset_in,
+                memcpy( (uint8_t *) data_ptr + valid_packet->packet.offset_in,
                         valid_packet->packet.data_in,
                         header->data_len );
             }
@@ -339,7 +350,11 @@ eui_send(   callback_data_out_t output_cbtion,
     if( output_cbtion && p_msg_obj )
     {
         settings->type = p_msg_obj->type;
- 
+        uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
+        void* data_ptr = p_msg_obj->ptr.data;
+        if (is_object) {
+            data_ptr = data_ptr_from_object(p_msg_obj->ptr.data, p_msg_obj->type, p_msg_obj->size);
+        }
         //decide if data will fit in a normal message, or requires multi-packet output
         if( p_msg_obj->size <= PAYLOAD_SIZE_MAX )
         {
@@ -347,7 +362,7 @@ eui_send(   callback_data_out_t output_cbtion,
                                         settings,
                                         p_msg_obj->id,
                                         p_msg_obj->size,
-                                        p_msg_obj->ptr.data );
+                                        data_ptr );
         }
 #ifndef EUI_CONF_OFFSETS_DISABLED
         else
@@ -616,6 +631,11 @@ send_tracked_variables( void )
     for(eui_variable_count_t i = 0; i < dev_tracked_num; i++)
     {
         eui_send( auto_output(), p_dev_tracked + i, &temp_header );
+        eui_message_t* m = p_dev_tracked + i;
+        if ( (m->type & 0x70u) == 0x60u) {
+            //reset ack status on an objects when send_tracked_variables ('w') is called
+            ack_object(m->ptr.data);
+        }
     }
 }
 
