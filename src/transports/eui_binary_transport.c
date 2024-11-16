@@ -13,7 +13,7 @@ encode_packet_simple(   callback_data_out_t output_function,
                         eui_pkt_settings_t  *settings,
                         const char          *msg_id,
                         uint16_t            payload_len,
-                        void*               payload )
+                        const void*               payload )
 {
     // Call the full encode with default ack# and offset values
     eui_header_t expanded_header;
@@ -106,7 +106,7 @@ encode_packet(  callback_data_out_t out_char,
                 eui_header_t        *header,
                 const char          *msg_id,
                 uint16_t            offset,
-                void*               payload )
+                const void*               payload )
 {
     uint8_t status = EUI_OUTPUT_ERROR;
 

@@ -87,7 +87,7 @@ encode_packet_simple(   callback_data_out_t output_function,
                         eui_pkt_settings_t  *settings,
                         const char          *msg_id,
                         uint16_t            payload_len,
-                        void*               payload);
+                        const void*               payload);
 
 /**
  * @brief Packet output function to send data
@@ -109,7 +109,7 @@ encode_packet(  callback_data_out_t out_char,
                 eui_header_t        *header,
                 const char          *msg_id,
                 uint16_t            offset,
-                void*               payload );
+                const void*               payload );
 
 /**
  * @brief Decodes inbound bytestream to separate data from COBS framing

@@ -247,7 +247,7 @@ handle_packet_action(   eui_interface_t *valid_packet,
         else if( valid_packet->packet.parser.data_bytes_in )
         {
             if (is_object) {
-                data_ptr = data_ptr_from_object(p_msg_obj->ptr.data, p_msg_obj->type, p_msg_obj->size);
+                data_ptr = ptr_settings_from_object(p_msg_obj);
             }
 
             // Ensure data won't exceed bounds with invalid offsets/lengths
@@ -355,9 +355,10 @@ eui_send(   callback_data_out_t output_cbtion,
     {
         settings->type = p_msg_obj->type;
         uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
-        void* data_ptr = p_msg_obj->ptr.data;
+        const void* data_ptr = p_msg_obj->ptr.data;
+
         if (is_object) {
-            data_ptr = data_ptr_from_object(p_msg_obj->ptr.data, p_msg_obj->type, p_msg_obj->size);
+            data_ptr = ptr_settings_from_object(p_msg_obj);
         }
         //decide if data will fit in a normal message, or requires multi-packet output
         if( p_msg_obj->size <= PAYLOAD_SIZE_MAX )
@@ -695,5 +696,13 @@ void send_update_on_tracked_variable(eui_variable_count_t i) {
     eui_send( auto_output(), p_dev_tracked + i, &temp_header );
 }
 
+__attribute__((weak))
+const void* ptr_settings_from_object_default(eui_message_t *p_msg_obj) {
+    //DOES NOTHING. Should be overridden by external function handling pointers to objects.
+    return p_msg_obj->ptr.data;
+}
+
+const void* ptr_settings_from_object(eui_message_t *p_msg_obj)
+    __attribute__((weak, alias("ptr_settings_from_object_default")));
 
 // END electricui.c

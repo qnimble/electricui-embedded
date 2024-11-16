@@ -210,17 +210,18 @@ void
 eui_send_untracked_on( eui_message_t *p_msg_obj, eui_interface_t *interface );
 
 /**
- * @brief Get offset between pointer to SD object (stored in memory) and the pointer to the data
+ * @brief Update p_msg_obj values (size, etc) and return updated pointer to data when data type is not a pointer to data but to an object
  *
- * This function must be provided externally to the library.
+ * This function must be provided externally to the library. This library includes a weak version of function that makes no modifications
+ * to the object, which is probably not useful if pointers to objects are used. Typical use would be to update the pointer to point to
+ * the underlying data of the object.
  *
- * @param ptr Pointer to the SD object
- * @param raw_type Type of the data (this is the type byte whose lower 4bits if the data type and upper 4 bits if pointer type and RO vs WR)
- * @param size Size of the data
- * @return Pointer to the data (as void*)
+ * @param p_msg_obj Pointer to the message object
+ * @return Pointer to the data (as const void*)
  */
-void*
-data_ptr_from_object(void* ptr, uint8_t raw_type, uint16_t size);
+
+const void*
+ptr_settings_from_object(eui_message_t *p_msg_obj);
 
 /**
  * @brief Have SD object reset its update state after ack comes in
