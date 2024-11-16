@@ -65,5 +65,7 @@
 #define EUI_INTERNAL_AM_LIST "u" // Delimit writable ID
 #define EUI_INTERNAL_AM_END  "v" // End of writable ID's
 #define EUI_INTERNAL_AV      "w" // Send writable variables
+#define EUI_INTERNAL_AV2      "x" // Request sending variables in 2.0 format including read_only state info
+#define EUI_INTERNAL_AV2_REPLY      "y" // Response with variables is 2.0 format including read_only state info
 
 #endif //end EUI_CONF_H

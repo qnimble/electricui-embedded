@@ -46,6 +46,9 @@ send_tracked_message_id_list( void );
 static void
 send_tracked_variables( void );
 
+static void
+send_tracked_variables_2p0( void );
+
 // Communication Interfaces management
 static eui_interface_t     *p_interface_arr;
 static uint8_t             interface_num;
@@ -72,6 +75,7 @@ static eui_message_t internal_msg_store[] =
 
     EUI_FUNC(   EUI_INTERNAL_AM, announce_dev_msg        ),
     EUI_FUNC(   EUI_INTERNAL_AV, send_tracked_variables  ),
+    EUI_FUNC(   EUI_INTERNAL_AV2, send_tracked_variables_2p0  ),
 };
 
 // Developer facing search
@@ -86,7 +90,7 @@ static eui_message_t *
 find_message_object( const char * search_id, uint8_t is_internal )
 {
     eui_message_t *found_obj_ptr = 0;
-    
+
     if( search_id )
     {
         if( is_internal )
@@ -637,6 +641,50 @@ send_tracked_variables( void )
             ack_object(m->ptr.data);
         }
     }
+}
+
+static void
+send_tracked_variables_2p0( void ) {
+    eui_variable_count_t variables_sent = 0;
+
+    eui_pkt_settings_t temp_header = { 0 };
+    temp_header.internal  = MSG_INTERNAL;
+    temp_header.response  = MSG_NRESP;
+    temp_header.type      = TYPE_CUSTOM;
+
+    uint8_t msgBuffer[ EUI_MAX_MSGID_SIZE*4 ]; // Can fit at least 4 full-size msgID
+    uint8_t msg_buffer_position  = 0;  // position in buffer
+    uint8_t id_len               = 0;  // length of a single id string
+    uint8_t id_packed_num        = 0;  // count messages packed into buffer
+
+    for( eui_variable_count_t i = 0; i < dev_tracked_num; i++ )
+    {
+        //copy messageID into the buffer, account for null termination characters as delimiter
+        id_len = strlen(p_dev_tracked[i].id) + 1;
+        memcpy(msgBuffer+msg_buffer_position, p_dev_tracked[i].id, id_len);
+        msg_buffer_position += id_len;
+        msgBuffer[msg_buffer_position++] = p_dev_tracked[i].type;
+        id_packed_num++;
+        variables_sent++;
+
+        //send messages and clear buffer if the buffer can't fit the next one or is finished
+        //subtract string length, minus 1 for null terminator and minus another one for type.
+        if( (dev_tracked_num - 1 <= i) || ( (sizeof(msgBuffer) - strlen(p_dev_tracked[i + 1].id) - 1 - 1) < msg_buffer_position) )
+        {
+            eui_encode_simple(  auto_output(),
+                                &temp_header,
+                                EUI_INTERNAL_AV2_REPLY,
+                                msg_buffer_position,
+                                &msgBuffer );
+
+            //cleanup
+            memset(msgBuffer, 0, sizeof(msgBuffer));
+            msg_buffer_position = 0;
+            id_packed_num  = 0;
+        }
+    }
+
+    return;
 }
 
 void send_update_on_tracked_variable(eui_variable_count_t i) {
