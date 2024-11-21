@@ -47,7 +47,7 @@ static void
 send_tracked_variables( void );
 
 static void
-send_tracked_variables_2p0( void );
+announce_dev_msg_2p0( void );
 
 // Communication Interfaces management
 static eui_interface_t     *p_interface_arr;
@@ -74,8 +74,8 @@ static eui_message_t internal_msg_store[] =
     EUI_UINT16_RO(  EUI_INTERNAL_BOARD_ID,      board_identifier    ),
 
     EUI_FUNC(   EUI_INTERNAL_AM, announce_dev_msg        ),
+    EUI_FUNC(   EUI_INTERNAL_AM2, announce_dev_msg_2p0  ),
     EUI_FUNC(   EUI_INTERNAL_AV, send_tracked_variables  ),
-    EUI_FUNC(   EUI_INTERNAL_AV2, send_tracked_variables_2p0  ),
 };
 
 // Developer facing search
@@ -645,10 +645,19 @@ send_tracked_variables( void )
 }
 
 static void
-send_tracked_variables_2p0( void ) {
+announce_dev_msg_2p0( void ) {
+    eui_pkt_settings_t temp_header = { 0 };
+    temp_header.internal  = MSG_INTERNAL;
+    temp_header.response  = MSG_NRESP;
+    temp_header.type      = TYPE_MANY_VARIABLES_SIZED;
+    eui_encode_simple(  auto_output(),
+                        &temp_header,
+                        EUI_INTERNAL_AM_END,
+                        sizeof(dev_tracked_num),
+                        &dev_tracked_num);
+
     eui_variable_count_t variables_sent = 0;
 
-    eui_pkt_settings_t temp_header = { 0 };
     temp_header.internal  = MSG_INTERNAL;
     temp_header.response  = MSG_NRESP;
     temp_header.type      = TYPE_CUSTOM;
@@ -665,16 +674,18 @@ send_tracked_variables_2p0( void ) {
         memcpy(msgBuffer+msg_buffer_position, p_dev_tracked[i].id, id_len);
         msg_buffer_position += id_len;
         msgBuffer[msg_buffer_position++] = p_dev_tracked[i].type;
+        msgBuffer[msg_buffer_position++] = p_dev_tracked[i].size & 0xFF;
+        msgBuffer[msg_buffer_position++] = p_dev_tracked[i].size >> 8;
         id_packed_num++;
         variables_sent++;
 
         //send messages and clear buffer if the buffer can't fit the next one or is finished
-        //subtract string length, minus 1 for null terminator and minus another one for type.
-        if( (dev_tracked_num - 1 <= i) || ( (sizeof(msgBuffer) - strlen(p_dev_tracked[i + 1].id) - 1 - 1) < msg_buffer_position) )
+        //subtract string length, minus 1 for null terminator, subtract another one for type and 2 more for size.
+        if( (dev_tracked_num - 1 <= i) || ( (sizeof(msgBuffer) - strlen(p_dev_tracked[i + 1].id) - 1 - 1 -2 ) < msg_buffer_position) )
         {
             eui_encode_simple(  auto_output(),
                                 &temp_header,
-                                EUI_INTERNAL_AV2_REPLY,
+                                EUI_INTERNAL_AM2_REPLY,
                                 msg_buffer_position,
                                 &msgBuffer );
 
