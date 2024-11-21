@@ -165,7 +165,6 @@ eui_parse( uint8_t inbound_byte, eui_interface_t *p_link )
         {
             // Running callbacks or write inbound data as required
             status.action = handle_packet_action( p_link, &header_in, p_msglocal );
-
             // Respond to a request for ack if the action completed successfully
             if( status.action == EUI_ACTION_OK )
             {
@@ -247,7 +246,10 @@ handle_packet_action(   eui_interface_t *valid_packet,
         else if( valid_packet->packet.parser.data_bytes_in )
         {
             if (is_object) {
-                data_ptr = ptr_settings_from_object(p_msg_obj);
+                // Copy the object to a new object to avoid modifying the original
+                // Expect for data_ptr, use the original for receiving data (and modified for sending)
+                eui_message_t new_msg_obj = *p_msg_obj;
+                data_ptr = ptr_settings_from_object(&new_msg_obj);
             }
 
             // Ensure data won't exceed bounds with invalid offsets/lengths
@@ -350,6 +352,7 @@ eui_send(   callback_data_out_t output_cbtion,
             eui_pkt_settings_t  *settings )
 {
     uint8_t status = EUI_OUTPUT_ERROR;
+    eui_message_t* local_msg_obj = p_msg_obj;
 
     if( output_cbtion && p_msg_obj )
     {
@@ -358,25 +361,27 @@ eui_send(   callback_data_out_t output_cbtion,
         const void* data_ptr = p_msg_obj->ptr.data;
 
         if (is_object) {
-            data_ptr = ptr_settings_from_object(p_msg_obj);
+            eui_message_t new_msg_obj = *p_msg_obj;
+            local_msg_obj = &new_msg_obj;
+            data_ptr = ptr_settings_from_object(&new_msg_obj);
         }
         //decide if data will fit in a normal message, or requires multi-packet output
-        if( p_msg_obj->size <= PAYLOAD_SIZE_MAX )
+        if( local_msg_obj->size <= PAYLOAD_SIZE_MAX )
         {
             status = eui_encode_simple( output_cbtion,
                                         settings,
-                                        p_msg_obj->id,
-                                        p_msg_obj->size,
+                                        local_msg_obj->id,
+                                        local_msg_obj->size,
                                         data_ptr );
         }
 #ifndef EUI_CONF_OFFSETS_DISABLED
         else
         {
             status = eui_send_range( output_cbtion,
-                                        p_msg_obj,
+                                        local_msg_obj,
                                         settings,
                                         0,
-                                        p_msg_obj->size );
+                                        local_msg_obj->size );
         }
 #endif
     }
