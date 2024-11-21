@@ -721,4 +721,15 @@ const void* ptr_settings_from_object_default(eui_message_t *p_msg_obj) {
 const void* ptr_settings_from_object(eui_message_t *p_msg_obj)
     __attribute__((weak, alias("ptr_settings_from_object_default")));
 
+__attribute__((weak))
+void ack_object_default(void* ptr) {
+    //DOES NOTHING. Should be overridden by external function handling pointers to objects.
+    return;
+}
+
+void ack_object(void *ptr)
+    __attribute__((weak, alias("ack_object_default")));
+
+
+
 // END electricui.c

@@ -224,11 +224,11 @@ const void*
 ptr_settings_from_object(eui_message_t *p_msg_obj);
 
 /**
- * @brief Have SD object reset its update state after ack comes in
+ * @brief Have object reset its update state after ack comes in
  *
  * When acknowledgement comes in, this functions resets the update state of the SD object so more data can be sent instead of
- * waiting earlier data to be ack'd. Since SD Objects prevents multiple updates in a row without acks in between this is
- * necessary for the next update to be sent.
+ * waiting earlier data to be ack'd. Since Objects can prevent multiple updates in a row without acks in between this is
+ * necessary for knowing when data has been received.
  */
 void
 ack_object(void* ptr);
