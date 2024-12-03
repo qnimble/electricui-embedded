@@ -360,10 +360,11 @@ eui_send(   callback_data_out_t output_cbtion,
         uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
         const void* data_ptr = p_msg_obj->ptr.data;
 
+        eui_message_t new_msg_obj;
         if (is_object) {
-            eui_message_t new_msg_obj = *p_msg_obj;
+            new_msg_obj = *p_msg_obj; //make local copy to avoid modifying original
             local_msg_obj = &new_msg_obj;
-            data_ptr = ptr_settings_from_object(&new_msg_obj);
+            new_msg_obj.ptr.data = ptr_settings_from_object(&new_msg_obj);
         }
         //decide if data will fit in a normal message, or requires multi-packet output
         if( local_msg_obj->size <= PAYLOAD_SIZE_MAX )
@@ -372,7 +373,7 @@ eui_send(   callback_data_out_t output_cbtion,
                                         settings,
                                         local_msg_obj->id,
                                         local_msg_obj->size,
-                                        data_ptr );
+                                        local_msg_obj->ptr.data );
         }
 #ifndef EUI_CONF_OFFSETS_DISABLED
         else
