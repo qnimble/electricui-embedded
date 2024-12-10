@@ -177,7 +177,8 @@ typedef struct {
     uint16_t      size;         ///< Size of the payload in bytes
 
     union {
-        void        *data;      ///< Pointer to user-owned data which is viewed/modified by Electric UI.
+        void       *data_editable;      ///< Pointer to user-owned data which is viewed/modified by Electric UI.
+        const void *data;
         eui_cb_t    callback;   ///< Function pointer which will be called when the message is received.
     } ptr;                      ///< Union provides the pointer to either data, or a callback in a typesafe manner.
 } eui_message_t;

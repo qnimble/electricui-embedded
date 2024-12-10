@@ -37,9 +37,6 @@ handle_packet_query(    eui_interface_t *valid_packet,
 static void
 announce_dev_msg( void );
 
-static void
-announce_dev_vars( void );
-
 static eui_variable_count_t
 send_tracked_message_id_list( void );
 
@@ -219,10 +216,10 @@ handle_packet_action(   eui_interface_t *valid_packet,
         uint8_t is_writable = !((uint8_t)p_msg_obj->type >> 7u);
 
         uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
-        void* data_ptr = p_msg_obj->ptr.data;
+        const void* data_ptr = p_msg_obj->ptr.data;
         if (is_object && (header->data_len == 0) )  {
             //empty packet, treat as ack
-            ack_object(p_msg_obj->ptr.data);
+            ack_object(p_msg_obj->ptr.data_editable);
         }
 
         if( is_callback )
@@ -358,7 +355,6 @@ eui_send(   callback_data_out_t output_cbtion,
     {
         settings->type = p_msg_obj->type;
         uint8_t is_object = ( p_msg_obj->type & 0x70u ) == 0x60u ; // Pointer to Object
-        const void* data_ptr = p_msg_obj->ptr.data;
 
         eui_message_t new_msg_obj;
         if (is_object) {
@@ -645,7 +641,7 @@ send_tracked_variables( void )
         eui_message_t* m = p_dev_tracked + i;
         if ( (m->type & 0x70u) == 0x60u) {
             //reset ack status on an objects when send_tracked_variables ('w') is called
-            ack_object(m->ptr.data);
+            ack_object(m->ptr.data_editable);
         }
     }
 }
