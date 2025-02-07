@@ -224,6 +224,13 @@ const void*
 ptr_settings_from_object(eui_message_t *p_msg_obj);
 
 /**
+ * @brief Update the object with new data
+ */
+void set_object(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uint16_t len);
+
+
+
+/**
  * @brief Have object reset its update state after ack comes in
  *
  * When acknowledgement comes in, this functions resets the update state of the SD object so more data can be sent instead of

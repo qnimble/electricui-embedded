@@ -242,20 +242,21 @@ handle_packet_action(   eui_interface_t *valid_packet,
         }
         else if( valid_packet->packet.parser.data_bytes_in )
         {
-            if (is_object) {
-                // Copy the object to a new object to avoid modifying the original
-                // Expect for data_ptr, use the original for receiving data (and modified for sending)
-                eui_message_t new_msg_obj = *p_msg_obj;
-                data_ptr = ptr_settings_from_object(&new_msg_obj);
-            }
-
             // Ensure data won't exceed bounds with invalid offsets/lengths
             if( is_writable && 
                 (valid_packet->packet.offset_in + (uint16_t)header->data_len) <= p_msg_obj->size )
             {
-                memcpy( (uint8_t *) data_ptr + valid_packet->packet.offset_in,
+                if (is_object) {
+                    // Copy the object to a new object to avoid modifying the original
+                    // Expect for data_ptr, use the original for receiving data (and modified for sending)
+                    eui_message_t new_msg_obj = *p_msg_obj;
+                    data_ptr = ptr_settings_from_object(&new_msg_obj);
+                    set_object(&new_msg_obj, valid_packet->packet.offset_in, valid_packet->packet.data_in, header->data_len);
+                } else {
+                    memcpy( (uint8_t *) data_ptr + valid_packet->packet.offset_in,
                         valid_packet->packet.data_in,
                         header->data_len );
+                }
             }
             else
             {
@@ -714,9 +715,17 @@ const void* ptr_settings_from_object_default(eui_message_t *p_msg_obj) {
     //DOES NOTHING. Should be overridden by external function handling pointers to objects.
     return p_msg_obj->ptr.data;
 }
-
 const void* ptr_settings_from_object(eui_message_t *p_msg_obj)
     __attribute__((weak, alias("ptr_settings_from_object_default")));
+
+__attribute__((weak))
+void set_object_default(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uint16_t len) {
+    //DOES NOTHING. Should be overridden by external function handling pointers to objects.
+    return;
+}
+
+void set_object(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uint16_t len)
+    __attribute__((weak, alias("set_object_default")));
 
 __attribute__((weak))
 void ack_object_default(void* ptr) {
