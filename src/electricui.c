@@ -682,6 +682,11 @@ announce_dev_msg_2p0( void ) {
         id_packed_num++;
         variables_sent++;
 
+         // Check if current variable is an object and reset its ack status
+        if ((p_dev_tracked[i].type & 0x70u) == 0x60u) {
+            ack_object(p_dev_tracked[i].ptr.data_editable);
+        }
+
         //send messages and clear buffer if the buffer can't fit the next one or is finished
         //subtract string length, minus 1 for null terminator, subtract another one for type and 2 more for size.
         if( (dev_tracked_num - 1 <= i) || ( (sizeof(msgBuffer) - strlen(p_dev_tracked[i + 1].id) - 1 - 1 -2 ) < msg_buffer_position) )
