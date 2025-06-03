@@ -241,6 +241,12 @@ void
 ack_object(void* ptr);
 
 
+
+/**
+ * @brielf Get the hostSetup variable (0 is not ready, 1 is ready)
+ */
+uint8_t eui_get_host_setup(void);
+
 #ifdef __cplusplus
 }
 #endif

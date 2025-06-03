@@ -58,7 +58,7 @@ static eui_variable_count_t    dev_tracked_num;
 // eUI variables accessible to developer
 static uint8_t     heartbeat;
 static uint16_t    board_identifier;
-
+static uint8_t        hostSetup = 0;
 
 
 //internal eUI tracked variables
@@ -570,6 +570,7 @@ eui_setup_identifier( char * uuid, uint8_t bytes )
 static void
 announce_dev_msg( void )
 {
+    hostSetup = 0; // Reset hostSetup to false before sending tracked variables
     eui_variable_count_t num_writable  = 0;
     num_writable = send_tracked_message_id_list();
 
@@ -645,10 +646,12 @@ send_tracked_variables( void )
             ack_object(m->ptr.data_editable);
         }
     }
+    hostSetup = 1; // Set hostSetup to true after sending all tracked variables
 }
 
 static void
 announce_dev_msg_2p0( void ) {
+    hostSetup = 0; // Reset hostSetup to false before sending tracked variables
     eui_pkt_settings_t temp_header = { 0 };
     temp_header.internal  = MSG_INTERNAL;
     temp_header.response  = MSG_NRESP;
@@ -741,6 +744,9 @@ void ack_object_default(void* ptr) {
 void ack_object(void *ptr)
     __attribute__((weak, alias("ack_object_default")));
 
-
+// Query if host setup is done.
+uint8_t eui_get_host_setup(void) {
+    return hostSetup;
+}
 
 // END electricui.c
