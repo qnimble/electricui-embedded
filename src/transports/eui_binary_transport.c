@@ -112,7 +112,7 @@ encode_packet(  callback_data_out_t out_char,
 
     if( out_char && header && msg_id && payload )
     {  
-        uint8_t pk_tmp[ 1 + PACKET_BASE_SIZE + EUI_MAX_MSGID_SIZE + PAYLOAD_SIZE_MAX + 4 ] = { 0 };
+        uint8_t pk_tmp[ 1 + PACKET_BASE_SIZE + EUI_MAX_MSGID_SIZE + OUTBOUND_PAYLOAD_SIZE_MAX + 4 ] = { 0 };
         uint16_t pk_i = 2; // Leave room for the 0x00 and framing offset byte
 
         // Write header bytes into the buffer
@@ -294,7 +294,7 @@ parse_decoded_packet( uint8_t byte_in, eui_packet_t *p_link_in )
             p_link_in->parser.data_bytes_in++;
 
             if( (  (uint16_t)p_link_in->parser.data_bytes_in >= (uint16_t)p_link_in->header.data_len )
-                || ( (uint16_t)p_link_in->parser.data_bytes_in >= PAYLOAD_SIZE_MAX) )
+                || ( (uint16_t)p_link_in->parser.data_bytes_in >= INBOUND_PAYLOAD_SIZE_MAX) )
             {
                 p_link_in->parser.state = exp_crc_b1;
             }

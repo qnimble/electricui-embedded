@@ -364,7 +364,7 @@ eui_send(   callback_data_out_t output_cbtion,
             new_msg_obj.ptr.data = ptr_settings_from_object(&new_msg_obj);
         }
         //decide if data will fit in a normal message, or requires multi-packet output
-        if( local_msg_obj->size <= PAYLOAD_SIZE_MAX )
+        if( local_msg_obj->size <= OUTBOUND_PAYLOAD_SIZE_MAX )
         {
             status = eui_encode_simple( output_cbtion,
                                         settings,
@@ -423,9 +423,9 @@ eui_send_range( callback_data_out_t output_cbtion,
     {
         uint16_t bytes_remaining = end_addr - base_addr;
 
-        if( bytes_remaining > PAYLOAD_SIZE_MAX )
+        if( bytes_remaining > OUTBOUND_PAYLOAD_SIZE_MAX )
         {
-            tmp_header.data_len = PAYLOAD_SIZE_MAX;
+            tmp_header.data_len = OUTBOUND_PAYLOAD_SIZE_MAX;
         }
         else
         {

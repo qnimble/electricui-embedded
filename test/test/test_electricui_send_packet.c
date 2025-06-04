@@ -11,7 +11,7 @@
  
 // PRIVATE DATA
 uint8_t small_data[10] = { 0xFF };
-uint8_t exact_data[PAYLOAD_SIZE_MAX] = { 0xFF };
+uint8_t exact_data[INBOUND_PAYLOAD_SIZE_MAX] = { 0xFF };
 uint8_t large_data[4096] = { 0xFF };
 
 eui_message_t short_payload = { .id = "short", .type = TYPE_UINT8, .size = sizeof(small_data), {.data = &small_data} };
@@ -65,7 +65,7 @@ void test_send_packet_large( void )
     encode_packet_ExpectAnyArgsAndReturn(EUI_OUTPUT_OK);   //metadata message describing the range
 
     //we expect a call for each packet required to send the offset range
-    uint8_t num_messages_sent = sizeof(large_data) / PAYLOAD_SIZE_MAX;
+    uint8_t num_messages_sent = sizeof(large_data) / INBOUND_PAYLOAD_SIZE_MAX;
     for(uint16_t i = 0; i <= num_messages_sent; i++)
     {
         encode_packet_ExpectAnyArgsAndReturn(EUI_OUTPUT_OK);

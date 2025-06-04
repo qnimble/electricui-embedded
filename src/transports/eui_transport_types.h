@@ -34,10 +34,20 @@
  *
  * @see eui_config.h for override define notes.
  */
-#ifndef PAYLOAD_SIZE_MAX
-    #define PAYLOAD_SIZE_MAX  120   //default inbound buffer size
+#ifndef INBOUND_PAYLOAD_SIZE_MAX
+    #define INBOUND_PAYLOAD_SIZE_MAX  120   //default inbound buffer size
 #endif
 
+/**
+ * @brief Default maximum outbound payload buffer size
+ *
+ * Sets a default inbound payload length maximum of 120 bytes. Developer configuration allows for different sizes.
+ *
+ * @see eui_config.h for override define notes.
+ */
+#ifndef OUTBOUND_PAYLOAD_SIZE_MAX
+    #define OUTBOUND_PAYLOAD_SIZE_MAX  234   //with overhead, this is 256 bytes typically which aligns nicely with usb.
+#endif
 
 /**
  * @brief Inbound Parsing statemachine data
@@ -68,7 +78,7 @@ typedef struct {
 #endif
     
     uint16_t    crc_in;                         ///< CRC value decoded from the packet
-    uint8_t     data_in[PAYLOAD_SIZE_MAX];      ///< Storage buffer of ingested payload data
+    uint8_t     data_in[INBOUND_PAYLOAD_SIZE_MAX];      ///< Storage buffer of ingested payload data
 } eui_packet_t;
 
 #endif //end EUI_TRANSPORT_TYPES_H
