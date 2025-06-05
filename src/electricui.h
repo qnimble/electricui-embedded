@@ -240,7 +240,10 @@ void set_object(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uin
 void
 ack_object(void* ptr);
 
-
+/**
+ * @brielf Get the heartbeat value
+ */
+uint8_t eui_get_heartbeat(void);
 
 /**
  * @brielf Get the hostSetup variable (0 is not ready, 1 is ready)

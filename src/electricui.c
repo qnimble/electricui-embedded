@@ -749,4 +749,8 @@ uint8_t eui_get_host_setup(void) {
     return hostSetup;
 }
 
+uint8_t eui_get_heartbeat( void ) {
+    return heartbeat;
+}
+
 // END electricui.c
