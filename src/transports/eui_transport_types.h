@@ -46,7 +46,7 @@
  * @see eui_config.h for override define notes.
  */
 #ifndef OUTBOUND_PAYLOAD_SIZE_MAX
-    #define OUTBOUND_PAYLOAD_SIZE_MAX  234   //with overhead, this is 256 bytes typically which aligns nicely with usb.
+    #define OUTBOUND_PAYLOAD_SIZE_MAX  120  //default outbound buffer size
 #endif
 
 /**
