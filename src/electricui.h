@@ -229,9 +229,15 @@ ptr_settings_from_object(eui_message_t *p_msg_obj);
 void set_object(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uint16_t len);
 
 
+/**
+ * @brief Have object reset its update state
+ *
+ */
+void
+reset_object(void* ptr);
 
 /**
- * @brief Have object reset its update state after ack comes in
+ * @brief Have object update state after ack comes in
  *
  * When acknowledgement comes in, this functions resets the update state of the SD object so more data can be sent instead of
  * waiting earlier data to be ack'd. Since Objects can prevent multiple updates in a row without acks in between this is

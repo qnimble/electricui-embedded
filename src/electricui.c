@@ -744,6 +744,18 @@ void ack_object_default(void* ptr) {
 void ack_object(void *ptr)
     __attribute__((weak, alias("ack_object_default")));
 
+
+
+    __attribute__((weak))
+void reset_object_default(void* ptr) {
+    //DOES NOTHING. Should be overridden by external function handling pointers to objects.
+    return;
+}
+
+void reset_object(void *ptr)
+    __attribute__((weak, alias("reset_object_default")));
+
+
 // Query if host setup is done.
 uint8_t eui_get_host_setup(void) {
     return hostSetup;
