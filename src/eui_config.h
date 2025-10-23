@@ -67,5 +67,7 @@
 #define EUI_INTERNAL_AV      "w" // Send writable variables
 #define EUI_INTERNAL_AM2      "x" // Request announcement of all ID's in 2.0 format including read_only state info
 #define EUI_INTERNAL_AM2_REPLY      "y" // Response with variables in 2.0 format including read_only state info
+#define EUI_INTERNAL_DEFAULTLAYOUT "z" // Send a default layout to the UI
+#define EUI_INTERNAL_DEFAULTLAYOUT_REPLY "A" // Send a default layout to the UI
 
 #endif //end EUI_CONF_H

@@ -30,7 +30,7 @@ extern "C" {
     #warning "ElectricUI will not handle data larger than PAYLOAD_SIZE_MAX"
 #endif
 
-#define EUI_LIBRARY_VERSION 9u
+#define EUI_LIBRARY_VERSION 10u
 
 /**
  * @brief Interfaces contain local storage for inbound packets, and pointers for data output callbacks, and state callbacks
@@ -255,6 +255,9 @@ uint8_t eui_get_heartbeat(void);
  * @brielf Get the hostSetup variable (0 is not ready, 1 is ready)
  */
 uint8_t eui_get_host_setup(void);
+
+void set_default_layout(const char* layout);
+
 
 #ifdef __cplusplus
 }

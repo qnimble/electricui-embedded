@@ -46,6 +46,10 @@ send_tracked_variables( void );
 static void
 announce_dev_msg_2p0( void );
 
+static void
+send_default_layout(void) ;
+
+
 // Communication Interfaces management
 static eui_interface_t     *p_interface_arr;
 static uint8_t             interface_num;
@@ -60,6 +64,12 @@ static uint8_t     heartbeat;
 static uint16_t    board_identifier;
 static uint8_t        hostSetup = 0;
 
+static const char* defaultLayout = 0; // Pointer to default layout string
+
+void set_default_layout(const char* layout) {
+    defaultLayout = layout;
+}
+
 
 //internal eUI tracked variables
 static uint8_t library_version = EUI_LIBRARY_VERSION;
@@ -73,6 +83,7 @@ static eui_message_t internal_msg_store[] =
     EUI_FUNC(   EUI_INTERNAL_AM, announce_dev_msg        ),
     EUI_FUNC(   EUI_INTERNAL_AM2, announce_dev_msg_2p0  ),
     EUI_FUNC(   EUI_INTERNAL_AV, send_tracked_variables  ),
+    EUI_FUNC(   EUI_INTERNAL_DEFAULTLAYOUT, send_default_layout  ),
 };
 
 // Developer facing search
@@ -648,6 +659,61 @@ send_tracked_variables( void )
     }
     hostSetup = 1; // Set hostSetup to true after sending all tracked variables
 }
+
+static void send_default_layout(void) {
+    if (defaultLayout) {
+        uint8_t status = EUI_OUTPUT_ERROR;
+
+        size_t remaining = strlen(defaultLayout)+1; //+1 for null terminator
+        uint16_t data_range[2]  = { 0 };
+        eui_header_t chunk_header = { 0 };
+
+        chunk_header.internal  = MSG_INTERNAL;
+        chunk_header.response  = MSG_NRESP;
+        chunk_header.type      = TYPE_OFFSET_METADATA;
+        chunk_header.id_len    = 1;
+        chunk_header.data_len  = sizeof(data_range); //base and end are sent
+
+        data_range[1] = remaining > UINT16_MAX ? UINT16_MAX : (uint16_t) remaining; //end address
+
+        status = eui_encode( auto_output(), &chunk_header, EUI_INTERNAL_DEFAULTLAYOUT_REPLY, 0x00, &data_range);
+
+        chunk_header.offset    = 1;
+        chunk_header.type      = TYPE_CHAR;
+
+        while (remaining > 0 && EUI_OUTPUT_OK == status) {
+
+            // Calculate size for this chunk
+            size_t chunk_size = remaining % OUTBOUND_PAYLOAD_SIZE_MAX;
+            if (chunk_size == 0) {
+                chunk_size = OUTBOUND_PAYLOAD_SIZE_MAX;
+            }
+
+            chunk_header.data_len = chunk_size;
+            remaining -= chunk_size;
+
+            status = encode_packet(    auto_output(),
+                                &chunk_header,
+                                EUI_INTERNAL_DEFAULTLAYOUT_REPLY,
+                                remaining,
+                                defaultLayout);
+        }
+    } else {
+        eui_header_t chunk_header = { 0 };
+        chunk_header.internal  = MSG_INTERNAL;
+        chunk_header.response  = MSG_NRESP;
+        chunk_header.type      = TYPE_CHAR;
+        chunk_header.id_len    = 1;
+        chunk_header.data_len  = 1;
+
+        encode_packet(auto_output(),
+                         &chunk_header,
+                                EUI_INTERNAL_DEFAULTLAYOUT_REPLY,
+                                1,
+                                &defaultLayout);
+    }
+}
+
 
 static void
 announce_dev_msg_2p0( void ) {
