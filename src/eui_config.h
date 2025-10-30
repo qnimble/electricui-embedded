@@ -69,5 +69,7 @@
 #define EUI_INTERNAL_AM2_REPLY      "y" // Response with variables in 2.0 format including read_only state info
 #define EUI_INTERNAL_DEFAULTLAYOUT "z" // Send a default layout to the UI
 #define EUI_INTERNAL_DEFAULTLAYOUT_REPLY "A" // Send a default layout to the UI
+#define EUI_INTERNAL_GET_KEYS_PAIR "B" // Request variables's keys
+
 
 #endif //end EUI_CONF_H

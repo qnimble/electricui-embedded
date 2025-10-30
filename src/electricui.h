@@ -247,6 +247,17 @@ void
 ack_object(void* ptr);
 
 /**
+ * @brief Get the number of valid entries in the object when object is a map or key/value store
+ */
+uint8_t number_of_valid_entries(const void* ptr);
+
+/**
+ * @brief Put a string version of the key/value pair in index from the SmartData<Key> or Map object into msgBuffer
+ */
+uint16_t list_or_key_pair(const void* ptr, uint8_t index, char* msgBuffer, uint16_t bufferSize);
+
+
+/**
  * @brielf Get the heartbeat value
  */
 uint8_t eui_get_heartbeat(void);

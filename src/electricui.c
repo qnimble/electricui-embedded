@@ -50,6 +50,8 @@ static void
 send_default_layout(void) ;
 
 
+
+
 // Communication Interfaces management
 static eui_interface_t     *p_interface_arr;
 static uint8_t             interface_num;
@@ -773,7 +775,30 @@ announce_dev_msg_2p0( void ) {
         }
     }
 
-    return;
+    // After sending all tracked variables, send list of values of key / maps
+    for( eui_variable_count_t i = 0; i < dev_tracked_num; i++ ) {
+        if ((p_dev_tracked[i].type & 0x70u) == 0x50u) {
+            uint8_t totalElements = number_of_valid_entries(p_dev_tracked[i].ptr.data);
+            uint8_t offset = strlen(p_dev_tracked[i].id)+1; //+1 for null terminator
+            if (offset >= sizeof(msgBuffer)) {
+                offset = sizeof(msgBuffer) - 1;
+            }
+            memcpy(msgBuffer, p_dev_tracked[i].id, offset);
+            temp_header.type      = TYPE_CHAR;
+            for (uint8_t j = 0; j < totalElements; j++) {
+                //msgBuffer[offset] = totalElements; // write one byte for size of data
+                uint16_t bytes_to_write = list_or_key_pair(p_dev_tracked[i].ptr.data,j, (char*) &msgBuffer[offset], sizeof(msgBuffer)-offset);
+
+                if (bytes_to_write != 0) {
+                    encode_packet_simple(  auto_output(),
+                            &temp_header,
+                            EUI_INTERNAL_GET_KEYS_PAIR,
+                            bytes_to_write + offset,
+                            &msgBuffer);
+                }
+            }
+        }
+    }
 }
 
 void send_update_on_tracked_variable(eui_variable_count_t i) {
@@ -798,8 +823,23 @@ void set_object_default(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data
     return;
 }
 
+__attribute__((weak))
+uint8_t number_of_valid_entries_default(const void *ptr) {return 0;}
+
+uint8_t number_of_valid_entries(const void *ptr)
+    __attribute__((weak, alias("number_of_valid_entries_default")));
+
+
 void set_object(eui_message_t *p_msg_obj, uint16_t offset, uint8_t *data_in, uint16_t len)
     __attribute__((weak, alias("set_object_default")));
+
+
+__attribute__((weak))
+uint16_t list_or_key_pair_default(const void* ptr, uint8_t index, char* msgBuffer, uint16_t bufferSize) { return 0; }
+
+uint16_t list_or_key_pair(const void* ptr, uint8_t index, char* msgBuffer, uint16_t bufferSize)
+    __attribute__((weak, alias("list_or_key_pair_default")));
+
 
 __attribute__((weak))
 void ack_object_default(void* ptr) {
